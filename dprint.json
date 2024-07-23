@@ -1,0 +1,17 @@
+{
+  "typescript": {
+    "jsx.quoteStyle": "preferDouble",
+    "quoteStyle": "preferSingle",
+    "importDeclaration.forceSingleLine": true
+  },
+  "includes": [
+    "**/*.{ts,tsx,js,jsx,cjs,mjs}"
+  ],
+  "excludes": [
+    "**/node_modules",
+    "**/*-lock.json"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.69.1.wasm"
+  ]
+}
