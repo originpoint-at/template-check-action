@@ -1,0 +1,31 @@
+name: CandyMint Template Checker
+description: Check a CandyMint template repository is valid
+inputs:
+  repo:
+    description: repository owner/repo
+    required: true
+  base:
+    description: base commit
+  head:
+    description: head commit
+    required: true
+    default: main
+  token:
+    description: GitHub token
+    default: ${{ github.token }}
+    required: true
+  repoPath:
+    description: repo path
+    required: true
+    default: template
+  onChainStorageLimit:
+    description: on chain storage limit
+    required: false
+outputs:
+  results:
+    description: check results
+  maxFileSize:
+    description: maximum file size
+runs:
+  using: node20
+  main: dist/index.cjs
