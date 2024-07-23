@@ -1,0 +1,9 @@
+name: CandyMint Template Checker
+description: Check a CandyMint template repository is valid
+inputs:
+  token:
+    description: GitHub token
+    default: ${{ github.token }}
+runs:
+  using: node20
+  main: dist/index.cjs
