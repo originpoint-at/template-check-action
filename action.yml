@@ -1,6 +1,13 @@
 name: CandyMint Template Checker
 description: Check a CandyMint template repository is valid
 inputs:
+  repo:
+    description: repository owner/repo
+  base:
+    description: base commit
+  head:
+    description: head commit
+    default: main
   token:
     description: GitHub token
     default: ${{ github.token }}
