@@ -1,9 +1,22 @@
 name: CandyMint Template Checker
 description: Check a CandyMint template repository is valid
 inputs:
+  repo:
+    description: repository owner/repo
+    required: true
+  base:
+    description: base commit
+  head:
+    description: head commit
+    required: true
+    default: main
   token:
     description: GitHub token
     default: ${{ github.token }}
+    required: true
+outputs:
+  results:
+    description: check results
 runs:
   using: node20
   main: dist/index.cjs

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { Context } from './context';
 import { DiffRule } from './rule';
-import { Diff, OctokitClient } from './types';
+import { OctokitClient } from './types';
 
 type Error = {
   filename: string;
@@ -9,7 +9,19 @@ type Error = {
   message: string;
 };
 
-export async function check(ctx: Context, octokit: OctokitClient, rules: DiffRule[]): Promise<Error[] | undefined> {
+export async function check(ctx: Context, octokit: OctokitClient, rules: DiffRule[]) {
+  const errors: Error[] = [];
+  for await (const err of _check(ctx, octokit, rules)) {
+    errors.push(err);
+  }
+  return errors;
+}
+
+async function* _check(
+  ctx: Context,
+  octokit: OctokitClient,
+  rules: DiffRule[],
+): AsyncGenerator<Error> {
   const { data: diffs } = await octokit.rest.repos.compareCommits({
     ...ctx.repo,
     head: ctx.head,
@@ -18,19 +30,24 @@ export async function check(ctx: Context, octokit: OctokitClient, rules: DiffRul
   if (!diffs.files) {
     return;
   }
-  return await Promise.all(diffs.files.map(async file => {
+  for await (const file of diffs.files) {
     core.info(`checking file ${file.filename}`);
-    return await Promise.all(rules.map(async rule => {
+    for await (const rule of rules) {
       if (!rule.pattern.test(file.filename)) {
         core.debug(`- rule not match: ${rule.name}, ${rule.pattern}`);
-        return;
+        continue;
       }
       core.debug(`- rule match: ${rule.name}, ${rule.pattern}`);
-      return (await rule.check(ctx, octokit, file))?.map(error => ({
-        filename: file.filename,
-        rule,
-        message: error,
-      }));
-    })).then(errors => errors.filter(error => !!error).flat());
-  })).then(res => res.flat());
+      const errors = await rule.check(ctx, octokit, file);
+      if (errors) {
+        for (const error of errors) {
+          yield {
+            filename: file.filename,
+            rule,
+            message: error,
+          };
+        }
+      }
+    }
+  }
 }
